@@ -4,21 +4,21 @@ interface PositionLocation {
   char: number;
 }
 
-export default class Position {
+export class JsonPosition {
   constructor(
     private readonly startLine: number,
     private readonly startColumn: number,
     private readonly startChar: number,
     private readonly endLine: number,
     private readonly endColumn: number,
-    private readonly endChar: number
+    private readonly endChar: number,
   ) {}
 
   get start(): PositionLocation {
     return {
       line: this.startLine,
       column: this.startColumn,
-      char: this.startChar
+      char: this.startChar,
     };
   }
 

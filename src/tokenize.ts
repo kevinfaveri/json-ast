@@ -1,47 +1,51 @@
-import error from "./error";
-import Position from "./position";
-import tokenizeErrorTypes from "./tokenizeErrorTypes";
+import { error } from "./error";
+import { JsonPosition } from "./position";
+import { cannotTokenizeSymbol } from "./tokenizeErrorTypes";
+import { JsonToken, ParseSettings } from "./types";
 
-export const tokenTypes = {
-  COMMENT: "COMMENT", // // ... \n\r? or /* ... */
-  LEFT_BRACE: "LEFT_BRACE", // {
-  RIGHT_BRACE: "RIGHT_BRACE", // }
-  LEFT_BRACKET: "LEFT_BRACKET", // [
-  RIGHT_BRACKET: "RIGHT_BRACKET", // ]
-  COLON: "COLON", // :
-  COMMA: "COMMA", // ,
-  STRING: "STRING", //
-  NUMBER: "NUMBER", //
-  TRUE: "TRUE", // true
-  FALSE: "FALSE", // false
-  NULL: "NULL", // null
-  IDENTIFIER: "IDENTIFIER" // identifiers
-};
+export enum JsonTokenTypes {
+  COMMENT = "COMMENT", // // ... \n\r? or /* ... */
+  LEFT_BRACE = "LEFT_BRACE", // {
+  RIGHT_BRACE = "RIGHT_BRACE", // }
+  LEFT_BRACKET = "LEFT_BRACKET", // [
+  RIGHT_BRACKET = "RIGHT_BRACKET", // ]
+  COLON = "COLON", //  :
+  COMMA = "COMMA", // ,
+  STRING = "STRING", //
+  NUMBER = "NUMBER", //
+  TRUE = "TRUE", // true
+  FALSE = "FALSE", // false
+  NULL = "NULL", // null
+  IDENTIFIER = "IDENTIFIER", // identifiers
+}
+
+interface ParseJsonToken {
+  type: JsonTokenTypes;
+  value: string;
+  line: number;
+  index: number;
+  column: number;
+}
 
 const charTokens = {
-  "{": tokenTypes.LEFT_BRACE,
-  "}": tokenTypes.RIGHT_BRACE,
-  "[": tokenTypes.LEFT_BRACKET,
-  "]": tokenTypes.RIGHT_BRACKET,
-  ":": tokenTypes.COLON,
-  ",": tokenTypes.COMMA
+  "{": JsonTokenTypes.LEFT_BRACE,
+  "}": JsonTokenTypes.RIGHT_BRACE,
+  "[": JsonTokenTypes.LEFT_BRACKET,
+  "]": JsonTokenTypes.RIGHT_BRACKET,
+  ":": JsonTokenTypes.COLON,
+  ",": JsonTokenTypes.COMMA,
 };
 
 const keywordsTokens = {
-  true: tokenTypes.TRUE,
-  false: tokenTypes.FALSE,
-  null: tokenTypes.NULL
+  true: JsonTokenTypes.TRUE,
+  false: JsonTokenTypes.FALSE,
+  null: JsonTokenTypes.NULL,
 };
 
 const stringStates = {
   _START_: 0,
   START_QUOTE_OR_CHAR: 1,
-  ESCAPE: 2
-};
-
-const stringQuoteChar = {
-  '"': 0,
-  "'": 1
+  ESCAPE: 2,
 };
 
 const escapes = {
@@ -53,7 +57,7 @@ const escapes = {
   n: 5, // New line
   r: 6, // Carriage return
   t: 7, // Horizontal tab
-  u: 8 // 4 hexadecimal digits
+  u: 8, // 4 hexadecimal digits
 };
 
 // Support regex
@@ -69,38 +73,39 @@ const numberStates = {
   POINT: 4,
   DIGIT_FRACTION: 5,
   EXP: 6,
-  EXP_DIGIT_OR_SIGN: 7
+  EXP_DIGIT_OR_SIGN: 7,
 };
 
 // HELPERS
 
-function isDigit1to9(char) {
+function isDigit1to9(char): boolean {
   return char >= "1" && char <= "9";
 }
 
-function isDigit(char) {
+function isDigit(char): boolean {
   return char >= "0" && char <= "9";
 }
 
-function isLetter(char) {
+function isLetter(char): boolean {
   return (char >= "a" && char <= "z") || (char >= "A" && char <= "Z");
 }
 
-function isHex(char) {
-  return (
-    isDigit(char) ||
-    (char >= "a" && char <= "f") ||
-    (char >= "A" && char <= "F")
-  );
+function isHex(char): boolean {
+  return isDigit(char) || (char >= "a" && char <= "f") || (char >= "A" && char <= "F");
 }
 
-function isExp(char) {
+function isExp(char): boolean {
   return char === "e" || char === "E";
 }
 
 // PARSERS
 
-function parseWhitespace(source, index, line, column) {
+function parseWhitespace(
+  source: string,
+  index: number,
+  line: number,
+  column: number,
+): Omit<ParseJsonToken, "type" | "value"> | null {
   const char = source.charAt(index);
 
   if (char === "\r") {
@@ -127,15 +132,15 @@ function parseWhitespace(source, index, line, column) {
   return { index, line, column };
 }
 
-function parseComment(source, index, line, column) {
+function parseComment(source: string, index: number, line: number, column: number): ParseJsonToken | null {
   const sourceLength = source.length;
   let char = source.charAt(index);
   if (char === "/") {
     let next_char = source.charAt(index + 1) || "";
     if ("/" === next_char) {
       // Unroll until the end of the line
-      let first_index = index + 2,
-        last_index = index + 2;
+      const first_index = index + 2;
+      let last_index = index + 2;
       index += 2;
 
       while (index < sourceLength) {
@@ -167,18 +172,16 @@ function parseComment(source, index, line, column) {
       }
 
       return {
-        type: tokenTypes.COMMENT,
-        value: source
-          .substring(first_index, last_index)
-          .replace(/(\r\n|\n|\r)/gm, ""),
+        type: JsonTokenTypes.COMMENT,
+        value: source.substring(first_index, last_index).replace(/(\r\n|\n|\r)/gm, ""),
         index: index,
         line: line,
-        column: column
+        column: column,
       };
     } else if ("*" === next_char) {
       // unroll until we find */
-      let first_index = index + 2,
-        last_index = index + 2;
+      const first_index = index + 2;
+      let last_index = index + 2;
       index += 2;
       while (index < sourceLength) {
         char = source.charAt(index);
@@ -203,11 +206,11 @@ function parseComment(source, index, line, column) {
             }
 
             return {
-              type: tokenTypes.COMMENT,
+              type: JsonTokenTypes.COMMENT,
               value: source.substring(first_index, last_index),
               index: index + 2,
               line: line,
-              column: column
+              column: column,
             };
           }
         }
@@ -219,7 +222,7 @@ function parseComment(source, index, line, column) {
   }
 }
 
-function parseChar(source, index, line, column) {
+function parseChar(source: string, index: number, line: number, column: number): ParseJsonToken | null {
   const char = source.charAt(index);
   if (char in charTokens) {
     return {
@@ -227,17 +230,15 @@ function parseChar(source, index, line, column) {
       line: line,
       column: column + 1,
       index: index + 1,
-      value: undefined
+      value: undefined,
     };
   } else {
     return null;
   }
 }
 
-function parseKeyword(source, index, line, column) {
-  const matched = Object.keys(keywordsTokens).find(
-    name => name === source.substr(index, name.length)
-  );
+function parseKeyword(source: string, index: number, line: number, column: number): ParseJsonToken | null {
+  const matched = Object.keys(keywordsTokens).find(name => name === source.substr(index, name.length));
 
   if (matched) {
     return {
@@ -245,14 +246,14 @@ function parseKeyword(source, index, line, column) {
       line: line,
       column: column + matched.length,
       index: index + matched.length,
-      value: null
+      value: null,
     };
   } else {
     return null;
   }
 }
 
-function parseIdentifier(source, index, line, column) {
+function parseIdentifier(source: string, index: number, line: number, column: number): ParseJsonToken | null {
   const sourceLength = source.length;
   const startIndex = index;
   let buffer = "";
@@ -270,18 +271,18 @@ function parseIdentifier(source, index, line, column) {
 
   if (buffer.length > 0) {
     return {
-      type: tokenTypes.IDENTIFIER,
+      type: JsonTokenTypes.IDENTIFIER,
       line: line,
       column: column + index - startIndex,
       index: index,
-      value: buffer
+      value: buffer,
     };
   } else {
     return null;
   }
 }
 
-function parseString(source, index, line, column) {
+function parseString(source: string, index: number, line: number, column: number): ParseJsonToken | null {
   const sourceLength = source.length;
   const startIndex = index;
   let buffer = "";
@@ -307,11 +308,11 @@ function parseString(source, index, line, column) {
         } else if (char === '"') {
           index++;
           return {
-            type: tokenTypes.STRING,
+            type: JsonTokenTypes.STRING,
             value: buffer,
             line: line,
             index: index,
-            column: column + index - startIndex
+            column: column + index - startIndex,
           };
         } else {
           buffer += char;
@@ -325,7 +326,7 @@ function parseString(source, index, line, column) {
           index++;
           if (char === "u") {
             for (let i = 0; i < 4; i++) {
-              let curChar = source.charAt(index);
+              const curChar = source.charAt(index);
               if (curChar && isHex(curChar)) {
                 buffer += curChar;
                 index++;
@@ -343,14 +344,14 @@ function parseString(source, index, line, column) {
   }
 }
 
-function parseNumber(source, index, line, column) {
+function parseNumber(source: string, index: number, line: number, column: number): ParseJsonToken | null {
   const sourceLength = source.length;
   const startIndex = index;
   let passedValueIndex = index;
   let state = numberStates._START_;
 
   iterator: while (index < sourceLength) {
-    let char = source.charAt(index);
+    const char = source.charAt(index);
 
     switch (state) {
       case numberStates._START_:
@@ -445,11 +446,11 @@ function parseNumber(source, index, line, column) {
 
   if (passedValueIndex > 0) {
     return {
-      type: tokenTypes.NUMBER,
+      type: JsonTokenTypes.NUMBER,
       value: source.substring(startIndex, passedValueIndex),
       line: line,
       index: passedValueIndex,
-      column: column + passedValueIndex - startIndex
+      column: column + passedValueIndex - startIndex,
     };
   } else {
     return null;
@@ -457,19 +458,19 @@ function parseNumber(source, index, line, column) {
 }
 
 const defaultSettings = {
-  verbose: true
+  verbose: true,
 };
 
-export function tokenize(source, settings?: any) {
+export function tokenize(source: string, settings?: ParseSettings): JsonToken[] {
   settings = Object.assign({}, defaultSettings, settings);
 
   let line = 1;
   let column = 1;
   let index = 0;
-  let tokens = [];
+  const tokens: JsonToken[] = [];
   const sourceLength = source.length;
   while (index < sourceLength) {
-    let whitespace = parseWhitespace(source, index, line, column);
+    const whitespace = parseWhitespace(source, index, line, column);
 
     if (whitespace) {
       index = whitespace.index;
@@ -478,7 +479,7 @@ export function tokenize(source, settings?: any) {
       continue;
     }
 
-    let matched =
+    const matched =
       parseComment(source, index, line, column) ||
       parseChar(source, index, line, column) ||
       parseKeyword(source, index, line, column) ||
@@ -486,21 +487,10 @@ export function tokenize(source, settings?: any) {
       parseString(source, index, line, column) ||
       parseNumber(source, index, line, column);
     if (matched) {
-      let token = { type: matched.type, value: matched.value } as {
-        type: any;
-        value: any;
-        position?: Position;
-      };
+      const token = { type: matched.type, value: matched.value } as JsonToken;
 
       if (settings.verbose) {
-        token.position = new Position(
-          line,
-          column,
-          index,
-          matched.line,
-          matched.column,
-          matched.index
-        );
+        token.position = new JsonPosition(line, column, index, matched.line, matched.column, matched.index);
       }
 
       tokens.push(token);
@@ -508,16 +498,7 @@ export function tokenize(source, settings?: any) {
       line = matched.line;
       column = matched.column;
     } else {
-      error(
-        tokenizeErrorTypes.cannotTokenizeSymbol(
-          source.charAt(index),
-          line,
-          column
-        ),
-        source,
-        line,
-        column
-      );
+      error(cannotTokenizeSymbol(source.charAt(index), line, column), source, line, column);
     }
   }
 
