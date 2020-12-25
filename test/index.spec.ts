@@ -24,10 +24,10 @@ function getCases(
   const folderPath = path.join(__dirname, dirname);
   const folder = fs.readdirSync(folderPath);
   const cases = folder
-    .filter(function(_case) {
+    .filter(function (_case) {
       return path.extname(_case) === ".json" && _case.charAt(0) !== "_";
     })
-    .map(function(fileName) {
+    .map(function (fileName) {
       return path.basename(fileName, ".json");
     });
 
@@ -41,9 +41,9 @@ function getCases(
   }
 }
 
-describe("Test cases", function() {
-  getCases("cases", function(caseName, inputFile, expectedFile) {
-    it(caseName, function() {
+describe("Test cases", function () {
+  getCases("cases", function (caseName, inputFile, expectedFile) {
+    it(caseName, function () {
       const parsedFile = parse(inputFile, expectedFile.options);
       // Now that we include methods in each Node, a simple way to test for
       // equality is to serialize the objects.
@@ -52,9 +52,9 @@ describe("Test cases", function() {
   });
 });
 
-describe("Error test cases", function() {
-  getCases("error-cases", function(caseName, inputFile, expectedFile) {
-    it(caseName, function() {
+describe("Error test cases", function () {
+  getCases("error-cases", function (caseName, inputFile, expectedFile) {
+    it(caseName, function () {
       try {
         parse(inputFile, expectedFile.options);
         expect(false).toBeTruthy();
@@ -90,9 +90,9 @@ class TestAccumulatorVisitor extends Visitor {
   }
 }
 
-describe("Visitor cases", function() {
-  getCases("visitor-cases", function(caseName, inputFile, expectedFile) {
-    it(caseName, function() {
+describe("Visitor cases", function () {
+  getCases("visitor-cases", function (caseName, inputFile, expectedFile) {
+    it(caseName, function () {
       const documentNode = parse(inputFile);
       const store: any = {};
       const accVisitor = new TestAccumulatorVisitor(store);
@@ -124,8 +124,8 @@ class SkipAfterAKey extends Visitor {
   }
 }
 
-describe("Visitor pattern", function() {
-  it("should stop traversal when the user decides to", function() {
+describe("Visitor pattern", function () {
+  it("should stop traversal when the user decides to", function () {
     const JSON_TESTCASE = `{
       "a": 1,
       "b": {
@@ -143,8 +143,8 @@ describe("Visitor pattern", function() {
   });
 });
 
-describe("Object conversion to native JSON", function() {
-  it("should convert properly basic structures", function() {
+describe("Object conversion to native JSON", function () {
+  it("should convert properly basic structures", function () {
     const JSON_TESTCASE = {
       a: 1,
       b: { ba: 2 },

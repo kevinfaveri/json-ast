@@ -21,7 +21,7 @@ function traverseAST(visitor: Visitor, node: JsonNodeType): void {
     case JsonNodeTypes.DOCUMENT: {
       visitor.document(node);
       if (node.comments) {
-        node.comments.forEach(commentNode => {
+        node.comments.forEach((commentNode) => {
           visitor.comment(commentNode);
         });
       }
@@ -33,12 +33,12 @@ function traverseAST(visitor: Visitor, node: JsonNodeType): void {
     case JsonNodeTypes.OBJECT: {
       visitor.object(node);
       if (node.comments) {
-        node.comments.forEach(commentNode => {
+        node.comments.forEach((commentNode) => {
           visitor.comment(commentNode);
         });
       }
       if (node.properties) {
-        node.properties.forEach(propNode => {
+        node.properties.forEach((propNode) => {
           propNode.accept(visitor);
         });
       }
@@ -58,12 +58,12 @@ function traverseAST(visitor: Visitor, node: JsonNodeType): void {
       visitor.array(node);
       if (visitor.stop) break;
       if (node.comments) {
-        node.comments.forEach(commentNode => {
+        node.comments.forEach((commentNode) => {
           visitor.comment(commentNode);
         });
       }
       if (node.items) {
-        node.items.forEach(itemNode => {
+        node.items.forEach((itemNode) => {
           itemNode.accept(visitor);
         });
       }

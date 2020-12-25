@@ -28,7 +28,7 @@ export function createDocument(value, position?: JsonPosition, comments?: JsonCo
   const result = new JsonDocument();
   result.child = value;
   if (comments) {
-    comments.forEach(comment => result.comments.push(comment));
+    comments.forEach((comment) => result.comments.push(comment));
   }
 
   if (position) {
@@ -57,10 +57,10 @@ export function createObjectProperty(key, value): JsonProperty {
 export function createObject(properties, position?: JsonPosition, comments?: JsonComment[]): JsonObject {
   const result = new JsonObject();
   if (properties) {
-    properties.forEach(prop => result.properties.push(prop));
+    properties.forEach((prop) => result.properties.push(prop));
   }
   if (comments) {
-    comments.forEach(comment => result.comments.push(comment));
+    comments.forEach((comment) => result.comments.push(comment));
   }
   if (position) {
     result.position = position;
@@ -71,10 +71,10 @@ export function createObject(properties, position?: JsonPosition, comments?: Jso
 export function createArray(items, position?: JsonPosition, comments?: JsonComment[]): JsonArray {
   const result = new JsonArray();
   if (items) {
-    items.forEach(prop => result.items.push(prop));
+    items.forEach((prop) => result.items.push(prop));
   }
   if (comments) {
-    comments.forEach(comment => result.comments.push(comment));
+    comments.forEach((comment) => result.comments.push(comment));
   }
   if (position) {
     result.position = position;

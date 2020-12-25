@@ -180,14 +180,14 @@ function recursiveNodeConversion(rootNode: JsonNodeType): any {
     case JsonNodeTypes.OBJECT: {
       result = {};
 
-      rootNode.properties.forEach(propNode => {
+      rootNode.properties.forEach((propNode) => {
         result[recursiveNodeConversion(propNode.key)] = recursiveNodeConversion(propNode.value);
       });
       return result;
     }
     case JsonNodeTypes.ARRAY: {
       result = [];
-      rootNode.items.forEach(itemNode => {
+      rootNode.items.forEach((itemNode) => {
         result.push(recursiveNodeConversion(itemNode));
       });
       return result;
@@ -211,7 +211,7 @@ function recursiveNodeConversion(rootNode: JsonNodeType): any {
   }
 }
 
-export function toObject<T extends object>(jsonNode: JsonNode): T {
+export function toObject<T extends Record<string, unknown>>(jsonNode: JsonNode): T {
   return JSON.parse(JSON.stringify(jsonNode));
 }
 

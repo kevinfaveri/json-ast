@@ -238,7 +238,7 @@ function parseChar(source: string, index: number, line: number, column: number):
 }
 
 function parseKeyword(source: string, index: number, line: number, column: number): ParseJsonToken | null {
-  const matched = Object.keys(keywordsTokens).find(name => name === source.substr(index, name.length));
+  const matched = Object.keys(keywordsTokens).find((name) => name === source.substr(index, name.length));
 
   if (matched) {
     return {
