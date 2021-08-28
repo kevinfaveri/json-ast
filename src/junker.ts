@@ -238,7 +238,7 @@ export function junker(tokenList: JsonToken[], settings: ParseSettings): JsonTok
     try {
       const tmpResultTokens = processor(resultTokens);
       resultTokens = tmpResultTokens;
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       continue;
     }
