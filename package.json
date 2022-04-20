@@ -2,9 +2,16 @@
   "name": "@anchan828/json-ast",
   "version": "2.1.50",
   "description": "JSON parser AST utilities",
-  "author": "anchan828",
+  "keywords": [
+    "json",
+    "extended-json",
+    "parser",
+    "ast"
+  ],
   "homepage": "https://github.com/anchan828/json-ast",
   "repository": "anchan828/json-ast",
+  "license": "MIT",
+  "author": "anchan828",
   "maintainers": [
     {
       "name": "Vlad Trushin <monospectr@mail.ru> (https://github.com/vtrushin)",
@@ -22,13 +29,6 @@
       "github-username": "anchan828"
     }
   ],
-  "license": "MIT",
-  "keywords": [
-    "json",
-    "extended-json",
-    "parser",
-    "ast"
-  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -37,11 +37,11 @@
     "README.md"
   ],
   "scripts": {
-    "prepublishOnly": "rm -rf dist && npm run build && rm -f dist/*.tsbuildinfo",
     "build": "tsc",
     "format": "prettier --write '**/*.{json,yml,yaml,md,graphql}'",
     "lint": "eslint . 'src/**/*.ts' 'test/**/*.ts'",
     "lint:fix": "npm run lint -- --fix",
+    "prepublishOnly": "rm -rf dist && npm run build && rm -f dist/*.tsbuildinfo",
     "test": "node --max_old_space_size=4096 --expose-gc ./node_modules/jest/bin/jest --logHeapUsage --runInBand",
     "test:debug": "node --max_old_space_size=8192 --inspect-brk --expose-gc node_modules/.bin/jest --runInBand"
   },
