@@ -219,7 +219,7 @@ export function toString(jsonNode: JsonNode): string {
   return JSON.stringify(jsonNode);
 }
 
-export function toJSON<T extends any>(jsonNode: JsonNodeType): T {
+export function toJSON<T>(jsonNode: JsonNodeType): T {
   if (!(jsonNode instanceof JsonNode)) throw new Error("JSON conversion only accepts a kind of JsonNode");
 
   return recursiveNodeConversion(jsonNode);
