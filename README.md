@@ -88,7 +88,7 @@ All the types exists in [src/ast.ts](src/ast.ts).
 ## API
 
 ```javascript
-import { parse, Visitor, AST } from "json-ast";
+import { parse, Visitor, toJSON } from "json-ast";
 
 // The visitor can stop at any time by assigning `Visitor.stop = true`
 class MyVisitor extends Visitor {
@@ -109,10 +109,10 @@ const ast = parse(JSON_BUFFER, { verbose: true, junker: true });
 assert(ast instanceof JsonDocument);
 
 const visitor = new MyVisitor();
-ast.visit(visitor);
+visitor.visit(ast);
 assert.deepEqual(visitor.comments, [" Some comment"]);
 
-// One can also the `JsonNode.toJSON` static method to convert to a JavaScript object
+// One can also the `toJSON(JsonNode)` static method to convert to a JavaScript object
 const obj = toJSON(ast);
 assert(obj.key === "value");
 ```
