@@ -1,3 +1,6 @@
+
+Note: This repository resolves several performance issues and updates dependent packages. There are no plans to add new features.
+
 # A tolerant JSON parser
 
 ![Test](https://github.com/anchan828/json-ast/workflows/Test/badge.svg)
