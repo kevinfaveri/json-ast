@@ -1,6 +1,6 @@
 {
   "name": "@anchan828/json-ast",
-  "version": "2.1.78",
+  "version": "2.1.79",
   "description": "JSON parser AST utilities",
   "keywords": [
     "json",
