@@ -115,13 +115,13 @@ export class JsonNumber extends JsonNode implements IJsonValue {
 }
 
 export class JsonTrue extends JsonNode implements IJsonValue {
-  public readonly value: true = true;
+  public readonly value = true as const;
 
   public readonly type: JsonNodeTypes.TRUE = JsonNodeTypes.TRUE;
 }
 
 export class JsonFalse extends JsonNode implements IJsonValue {
-  public readonly value: false = false;
+  public readonly value = false as const;
 
   public readonly type: JsonNodeTypes.FALSE = JsonNodeTypes.FALSE;
 }
@@ -197,8 +197,8 @@ function recursiveNodeConversion(rootNode: JsonNodeType): any {
     case JsonNodeTypes.KEY:
       return rootNode.value;
     case JsonNodeTypes.NUMBER: {
-      if (typeof rootNode.value === "number") return rootNode.value;
-      return parseFloat(rootNode.value);
+      if (typeof rootNode.value !== "number") return parseFloat((rootNode as any).value);
+      return rootNode.value;
     }
     case JsonNodeTypes.TRUE:
       return true;
