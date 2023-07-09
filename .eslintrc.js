@@ -1,10 +1,9 @@
-const prettierRc = require("./.prettierrc");
 module.exports = {
   env: {
     node: true,
     jest: true,
   },
-  extends: ["plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"],
+  extends: ["plugin:@typescript-eslint/recommended", "prettier"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     sourceType: "module",
@@ -23,6 +22,5 @@ module.exports = {
     "lines-between-class-members": ["error", "always"],
     "no-useless-constructor": "off",
     "no-unused-vars": "off",
-    "prettier/prettier": ["error", prettierRc],
   },
 };
